@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "signUp" ADD COLUMN     "google" BOOLEAN NOT NULL DEFAULT false,
+ALTER COLUMN "hashedPassword" DROP NOT NULL,
+ALTER COLUMN "salt" DROP NOT NULL;

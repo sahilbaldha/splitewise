@@ -1,0 +1,12 @@
+@import "tailwindcss";
+
+.animate {
+  &:hover {
+    transition: all;
+    transform: scale(1.01);
+  }
+  &:active {
+    transition: all;
+    transform: scale(0.99);
+  }
+}

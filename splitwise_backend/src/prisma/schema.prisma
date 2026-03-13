@@ -1,0 +1,107 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id             String    @id @default(cuid())
+  email          String    @unique
+  name           String
+  hashedPassword String?
+  salt           String?
+  createdAt      DateTime  @default(now())
+  isAdmin        Boolean   @default(false)
+  google         Boolean   @default(false)
+  authoredGroups Group[]   @relation("AuthorRelation")
+  groups         Group[]   @relation("UserGroups")
+  expensesPaid   Expense[] @relation("PayerRelation")
+  Expense        Expense[] @relation("UserExpense")
+}
+
+model Group {
+  id         String          @id @default(cuid())
+  group_name String          @unique
+  author_id  String
+  author     User            @relation("AuthorRelation", fields: [author_id], references: [id])
+  members    User[]          @relation("UserGroups")
+  expenses   Expense[]       @relation("ExpensesGroup")
+  group      ExpenseResult[]
+}
+
+
+model images {
+  userId   String
+  filename String @unique
+  
+}
+
+model Expense {
+  id          String   @id @default(cuid())
+  description String
+  price       Int
+  date        DateTime @default(now())
+  note        String?
+  image       String?
+
+  users User[] @relation("UserExpense")
+
+  paid_by_id String
+  paid_by    User   @relation("PayerRelation", fields: [paid_by_id], references: [id])
+
+  group_id String?
+  group    Group?  @relation("ExpensesGroup", fields: [group_id], references: [id])
+
+  subcategory_id String
+  subCategory    SubCategory     @relation("categoryExpense", fields: [subcategory_id], references: [id])
+  notes          Notes[]
+  method         splitemethod    @default(equally)
+  ExpenseResult  ExpenseResult[] @relation("expenseresult")
+}
+
+model ExpenseResult {
+  id         String  @id @default(cuid())
+  userResult Int
+  expense_id String
+  expense    Expense @relation("expenseresult", fields: [expense_id], references: [id])
+
+  group_id String
+  group    Group  @relation(fields: [group_id], references: [id])
+}
+
+enum splitemethod {
+  equally
+  percentages
+  exact
+}
+
+model Category {
+  id            String        @id @default(cuid())
+  category_name String        @unique
+  subCategories SubCategory[]
+}
+
+model SubCategory {
+  id          String    @id @default(cuid())
+  name        String
+  category_id String
+  category    Category  @relation(fields: [category_id], references: [id])
+  expenses    Expense[] @relation("categoryExpense")
+
+}
+
+model Notes {
+  id         String  @id @default(cuid())
+  comments   String
+  expense_id String
+  expense    Expense @relation(fields: [expense_id], references: [id])
+}
